@@ -1,7 +1,7 @@
-name: Deploy on Github Pages
+name: Deploy on OSS test env
 
 on:
-  push:
+  pull_request:
     branches:
       - main
 
@@ -56,11 +56,20 @@ jobs:
       - name: Generate HTML files
         run: make html -W --keep-going
 
-      - name: Deploy to gh-pages branch
-        uses: JamesIves/github-pages-deploy-action@3.7.1
+      - name: Deploy to OSS test env
+        run: |
+          export TIMESTAMP=$(date +%s)
+          wget http://gosspublic.alicdn.com/ossutil/1.7.1/ossutil64
+          chmod 755 ossutil64
+          ./ossutil64 config -e ${{ secrets.OSS_TEST_ENDPOINT }} -i ${{ secrets.OSS_TEST_ACCESS_KEY_ID }} -k ${{ secrets.OSS_TEST_ACCESS_KEY_SECRET }}
+          ./ossutil64 cp -r build/html oss://${{ secrets.OSS_TEST_BUCKET }}/master/documentation/1.3/v$TIMESTAMP/en
+          ./ossutil64 cp -r build/html oss://${{ secrets.OSS_TEST_BUCKET }}/master/documentation/1.3/v$TIMESTAMP/zh
+          ./ossutil64 rm oss://${{ secrets.OSS_TEST_BUCKET }}/master/documentation/1.3/latest
+          echo $TIMESTAMP > latest
+          ./ossutil64 cp latest oss://${{ secrets.OSS_TEST_BUCKET }}/master/documentation/1.3/latest
+
+      - name: OSS Webhook Trigger
+        uses: muinmomin/webhook-action@v1.0.0
         with:
-          GITHUB_TOKEN: ${{ secrets.BOT_TOKEN }}
-          BRANCH: gh-pages
-          FOLDER: build/html
-          CLEAN: true
+          url: ${{ secrets.OSS_TEST_CI_TRIGGER }}/master
 

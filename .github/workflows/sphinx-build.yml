@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout document repp
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
 
       - name: Checkout theme repo
         uses: actions/checkout@v2
