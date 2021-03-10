@@ -2438,5 +2438,8 @@ if __name__ == "__main__":
     x = mge.random.normal(size=(1, 3, 224, 224))
     model.eval()
     pred = model(x)
+<<<<<<< HEAD
+>>>>>>> c85879b... fix bug of resnest14 and resnest26
+=======
 >>>>>>> c85879b... fix bug of resnest14 and resnest26
     print(pred.shape)
